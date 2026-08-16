@@ -160,6 +160,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.18.0"
+  mind_map:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: a7eef30e7efe6583200b4596ec5f304cc4d46e48
+      url: "https://github.com/BrianTran24/mind_map.git"
+    source: git
+    version: "1.0.5"
   path:
     dependency: transitive
     description:

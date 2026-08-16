@@ -68,21 +68,28 @@ class IntroScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final slides = [
       ContentConfig(
-        title: 'Welcome to Breadcrumbs',
-        description: 'Save links and ideas so they are always easy to find.',
+        title: 'Welcome to Breadcrumbs!',
+        description: 'All the links you save on your desktop browser with the extension will appear on this app.',
         backgroundColor: const Color(0xFF4C5BA6),
         styleTitle: const TextStyle(color: Colors.white, fontSize: 30),
         styleDescription: const TextStyle(color: Colors.white70, fontSize: 18),
       ),
       ContentConfig(
-        title: 'Organize Faster',
-        description: 'Group bookmarks by interest and discover them instantly.',
+        title: 'Explore Your Interests',
+        description: 'You can explore your saved links through your already organized interests and groups in your personalized mind map and see how much engagement you have with each topic.',
         backgroundColor: const Color(0xFF8A4AA8),
         styleTitle: const TextStyle(color: Colors.white, fontSize: 30),
         styleDescription: const TextStyle(color: Colors.white70, fontSize: 18),
       ),
       ContentConfig(
-        title: 'Ready to Explore?',
+        title: 'Discover Your Future',
+        description: 'Chat with our personalized AI assistant to discover new interests, recommendations, insights, and opportunities based on your saved links.',
+        backgroundColor: const Color.fromARGB(255, 168, 74, 159),
+        styleTitle: const TextStyle(color: Colors.white, fontSize: 30),
+        styleDescription: const TextStyle(color: Colors.white70, fontSize: 18),
+      ),
+      ContentConfig(
+        title: 'Ready to Understand Yourself?',
         description: 'Tap DONE to open your dashboard.',
         backgroundColor: const Color(0xFFCE5D8D),
         styleTitle: const TextStyle(color: Colors.white, fontSize: 30),

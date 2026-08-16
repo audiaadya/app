@@ -6,8 +6,14 @@ class LikesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Likes')),
-      body: const Center(child: Text('Likes page — edit this in lib/screens/likes.dart')),
+      appBar: AppBar(
+        title: const Text('Likes'),
+      ),
+      body: const SafeArea(
+        child: Center(
+          child: Text('No likes yet'),
+        ),
+      ),
     );
   }
 }
