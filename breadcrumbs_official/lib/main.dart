@@ -1,19 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:intro_slider/intro_slider.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-const _items = [
-  {'title': 'article on pandas', 'h': 150.0, 'color': Color(0xFF6672AA)},
-  {'title': 'docs page on chemistry', 'h': 100.0, 'color': Color(0xFF6672AA)},
-  {'title': 'youtube video on baby penguins', 'h': 92.0, 'color': Color(0xFF6672AA)},
-  {'title': 'article on how to fix your phone', 'h': 92.0, 'color': Color(0xFF6672AA)},
-];
+import 'screens/home.dart';
+import 'screens/likes.dart';
+import 'screens/profile.dart';
+import 'screens/search.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  final isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
+  runApp(MyApp(initialFirstLaunch: isFirstLaunch));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  final bool initialFirstLaunch;
+
+  const MyApp({super.key, this.initialFirstLaunch = true});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late bool _showIntro;
+
+  @override
+  void initState() {
+    super.initState();
+    _showIntro = widget.initialFirstLaunch;
+  }
+
+  Future<void> _completeIntro() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isFirstLaunch', false);
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _showIntro = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +50,54 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Bookmarks Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.light),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const HomeScaffold(),
+      home: _showIntro
+          ? IntroScreen(onDonePress: _completeIntro)
+          : const HomeScaffold(),
+    );
+  }
+}
+
+class IntroScreen extends StatelessWidget {
+  final VoidCallback onDonePress;
+
+  const IntroScreen({super.key, required this.onDonePress});
+
+  @override
+  Widget build(BuildContext context) {
+    final slides = [
+      ContentConfig(
+        title: 'Welcome to Breadcrumbs',
+        description: 'Save links and ideas so they are always easy to find.',
+        backgroundColor: const Color(0xFF4C5BA6),
+        styleTitle: const TextStyle(color: Colors.white, fontSize: 30),
+        styleDescription: const TextStyle(color: Colors.white70, fontSize: 18),
+      ),
+      ContentConfig(
+        title: 'Organize Faster',
+        description: 'Group bookmarks by interest and discover them instantly.',
+        backgroundColor: const Color(0xFF8A4AA8),
+        styleTitle: const TextStyle(color: Colors.white, fontSize: 30),
+        styleDescription: const TextStyle(color: Colors.white70, fontSize: 18),
+      ),
+      ContentConfig(
+        title: 'Ready to Explore?',
+        description: 'Tap DONE to open your dashboard.',
+        backgroundColor: const Color(0xFFCE5D8D),
+        styleTitle: const TextStyle(color: Colors.white, fontSize: 30),
+        styleDescription: const TextStyle(color: Colors.white70, fontSize: 18),
+      ),
+    ];
+
+    return IntroSlider(
+      key: const ValueKey('intro_slider'),
+      listContentConfig: slides,
+      renderNextBtn: const Text('NEXT'),
+      renderDoneBtn: const Text('DONE'),
+      renderSkipBtn: const Text('SKIP'),
+      onDonePress: onDonePress,
+      onSkipPress: onDonePress,
     );
   }
 }
@@ -40,31 +114,30 @@ class _HomeScaffoldState extends State<HomeScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    final accent = const Color.fromARGB(255, 77, 67, 162);
+    const accent = Color.fromARGB(255, 77, 67, 162);
 
     Widget body;
     switch (_selectedIndex) {
       case 0:
-        body = const MasonryGrid();
+        body = const HomeScreen();
         break;
       case 1:
-        body = const Center(child: Text('Likes'));
+        body = const LikesScreen();
         break;
       case 2:
-        body = const Center(child: Text('Search'));
+        body = const SearchScreen();
         break;
       default:
-        body = const Center(child: Text('Profile'));
+        body = const ProfileScreen();
     }
 
     return Scaffold(
       body: body,
       bottomNavigationBar: SalomonBottomBar(
         currentIndex: _selectedIndex,
-        onTap: (i) => setState(() => _selectedIndex = i),
+        onTap: (index) => setState(() => _selectedIndex = index),
         selectedItemColor: const Color.fromARGB(255, 104, 14, 92),
         unselectedItemColor: const Color.fromARGB(179, 122, 114, 158),
-        // use a container to give the bar a background matching the design
         items: [
           SalomonBottomBarItem(
             icon: const Icon(Icons.home),
@@ -87,128 +160,6 @@ class _HomeScaffoldState extends State<HomeScaffold> {
             selectedColor: accent,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class MasonryGrid extends StatelessWidget {
-  const MasonryGrid({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    const spacing = 16.0;
-    final bg = const Color(0xFFF9EAF0);
-    final cardColor = const Color(0xFF6672AA);
-
-    return Scaffold(
-      backgroundColor: bg,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(spacing),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 6,
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: cardColor,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Weekly Bookmarks',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(color: Colors.white)),
-                            const SizedBox(height: 12),
-                            for (var t in _items)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
-                                child: Text('• ${t['title']}',
-                                    style: const TextStyle(
-                                        color: Colors.white, height: 1.4)),
-                              ),
-                            const SizedBox(height: 8),
-                            Text('see more on analytics',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(color: Colors.white70)),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: spacing),
-                    Expanded(
-                      flex: 4,
-                      child: Column(
-                        children: [
-                          // Circular progress
-                          Container(
-                            height: 140,
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(80),
-                            ),
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                SizedBox(
-                                  height: 120,
-                                  width: 120,
-                                  child: CircularProgressIndicator(
-                                    value: 0.67,
-                                    strokeWidth: 14,
-                                    backgroundColor: cardColor.withOpacity(0.2),
-                                    valueColor: AlwaysStoppedAnimation(const Color(0xFFE996C8)),
-                                  ),
-                                ),
-                                Text('67%', style: Theme.of(context).textTheme.headlineSmall),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: spacing),
-                          Container(
-                            height: 120,
-                            decoration: BoxDecoration(
-                              color: cardColor,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: spacing),
-                Container(
-                  height: 180,
-                  decoration: BoxDecoration(
-                    color: cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Center(
-                      child: Text('Weekly Bookmarks',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(color: Colors.white))),
-                ),
-                const SizedBox(height: spacing * 1.5),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }
