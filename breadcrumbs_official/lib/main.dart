@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:intro_slider/intro_slider.dart';
-import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'screens/auth_screen.dart';
 import 'screens/home.dart';
 import 'screens/likes.dart';
 import 'screens/profile.dart';
 import 'screens/search.dart';
+import 'services/appwrite_service.dart';
+import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AppwriteService.configureClient();
+
   final prefs = await SharedPreferences.getInstance();
   final isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
+
   runApp(MyApp(initialFirstLaunch: isFirstLaunch));
 }
 
@@ -26,11 +30,31 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late bool _showIntro;
+  bool _isCheckingAuth = true;
+  bool _isAuthenticated = false;
 
   @override
   void initState() {
     super.initState();
     _showIntro = widget.initialFirstLaunch;
+    _checkSession();
+  }
+
+  Future<void> _checkSession() async {
+    try {
+      await AppwriteService.getCurrentUser();
+      if (!mounted) return;
+      setState(() {
+        _isAuthenticated = true;
+        _isCheckingAuth = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isAuthenticated = false;
+        _isCheckingAuth = false;
+      });
+    }
   }
 
   Future<void> _completeIntro() async {
@@ -46,15 +70,48 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    if (_showIntro) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Bookmarks Demo',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        ),
+        home: IntroScreen(onDonePress: _completeIntro),
+      );
+    }
+
+    if (_isCheckingAuth) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Bookmarks Demo',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        ),
+        home: const Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      );
+    }
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Bookmarks Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: _showIntro
-          ? IntroScreen(onDonePress: _completeIntro)
-          : const HomeScaffold(),
+      home: _isAuthenticated
+          ? const HomeScaffold()
+          : AuthScreen(
+              onAuthenticated: () {
+                setState(() {
+                  _isAuthenticated = true;
+                  _isCheckingAuth = false;
+                });
+              },
+            ),
     );
   }
 }
@@ -66,45 +123,177 @@ class IntroScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final slides = [
-      ContentConfig(
-        title: 'Welcome to Breadcrumbs!',
-        description: 'All the links you save on your desktop browser with the extension will appear on this app.',
-        backgroundColor: const Color(0xFF4C5BA6),
-        styleTitle: const TextStyle(color: Colors.white, fontSize: 30),
-        styleDescription: const TextStyle(color: Colors.white70, fontSize: 18),
-      ),
-      ContentConfig(
-        title: 'Explore Your Interests',
-        description: 'You can explore your saved links through your already organized interests and groups in your personalized mind map and see how much engagement you have with each topic.',
-        backgroundColor: const Color(0xFF8A4AA8),
-        styleTitle: const TextStyle(color: Colors.white, fontSize: 30),
-        styleDescription: const TextStyle(color: Colors.white70, fontSize: 18),
-      ),
-      ContentConfig(
-        title: 'Discover Your Future',
-        description: 'Chat with our personalized AI assistant to discover new interests, recommendations, insights, and opportunities based on your saved links.',
-        backgroundColor: const Color.fromARGB(255, 168, 74, 159),
-        styleTitle: const TextStyle(color: Colors.white, fontSize: 30),
-        styleDescription: const TextStyle(color: Colors.white70, fontSize: 18),
-      ),
-      ContentConfig(
-        title: 'Ready to Understand Yourself?',
-        description: 'Tap DONE to open your dashboard.',
-        backgroundColor: const Color(0xFFCE5D8D),
-        styleTitle: const TextStyle(color: Colors.white, fontSize: 30),
-        styleDescription: const TextStyle(color: Colors.white70, fontSize: 18),
-      ),
-    ];
+    return ConcentricAnimationOnboarding(onDonePress: onDonePress);
+  }
+}
 
-    return IntroSlider(
-      key: const ValueKey('intro_slider'),
-      listContentConfig: slides,
-      renderNextBtn: const Text('NEXT'),
-      renderDoneBtn: const Text('DONE'),
-      renderSkipBtn: const Text('SKIP'),
-      onDonePress: onDonePress,
-      onSkipPress: onDonePress,
+final pages = [
+  const PageData(
+    icon: Icons.food_bank_outlined,
+    title: 'Compile your list of bookmarks through your browser',
+    bgColor: Color.fromARGB(255, 96, 131, 185),
+    textColor: Colors.white,
+  ),
+  const PageData(
+    icon: Icons.shopping_bag_outlined,
+    title: 'Sync it to the app to see real time data about your interests',
+    bgColor: Color.fromARGB(255, 71, 74, 109),
+    textColor: Color(0xff3b1790),
+  ),
+  const PageData(
+    icon: Icons.delivery_dining,
+    title: 'Review and save your favorites',
+    bgColor: Color.fromARGB(255, 92, 60, 115),
+    textColor: Color.fromARGB(255, 255, 255, 255),
+  ),
+  const PageData(
+    icon: Icons.check_circle_outline,
+    title: 'Order and wait',
+    bgColor: Color.fromARGB(255, 170, 103, 170),
+    textColor: Color.fromARGB(255, 255, 255, 255),
+  ),
+];
+
+class ConcentricAnimationOnboarding extends StatefulWidget {
+  final VoidCallback onDonePress;
+
+  const ConcentricAnimationOnboarding({super.key, required this.onDonePress});
+
+  @override
+  State<ConcentricAnimationOnboarding> createState() =>
+      _ConcentricAnimationOnboardingState();
+}
+
+class _ConcentricAnimationOnboardingState
+    extends State<ConcentricAnimationOnboarding> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _nextPage() {
+    final nextIndex = _currentPage + 1;
+    if (nextIndex < pages.length) {
+      _pageController.animateToPage(
+        nextIndex,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+      return;
+    }
+
+    widget.onDonePress();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: PageView.builder(
+        controller: _pageController,
+        itemCount: pages.length,
+        onPageChanged: (index) => setState(() => _currentPage = index),
+        itemBuilder: (context, index) {
+          final page = pages[index];
+          return _Page(page: page);
+        },
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TextButton(
+                onPressed: _currentPage == 0
+                    ? null
+                    : () => _pageController.previousPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        ),
+                child: const Text('Back'),
+              ),
+              Row(
+                children: List.generate(pages.length, (index) {
+                  final active = index == _currentPage;
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: active ? 18 : 8,
+                    height: 8,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      color: active ? Colors.deepPurple : Colors.grey,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  );
+                }),
+              ),
+              ElevatedButton(
+                onPressed: _nextPage,
+                child: Text(_currentPage == pages.length - 1 ? 'Done' : 'Next'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class PageData {
+  final String? title;
+  final IconData? icon;
+  final Color bgColor;
+  final Color textColor;
+
+  const PageData({
+    this.title,
+    this.icon,
+    this.bgColor = Colors.white,
+    this.textColor = Colors.black,
+  });
+}
+
+class _Page extends StatelessWidget {
+  final PageData page;
+
+  const _Page({required this.page});
+
+  @override
+  Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: page.bgColor,
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            margin: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: page.textColor,
+            ),
+            child: Icon(page.icon, size: screenHeight * 0.1, color: page.bgColor),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            page.title ?? '',
+            style: TextStyle(
+              color: page.textColor,
+              fontSize: screenHeight * 0.035,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }

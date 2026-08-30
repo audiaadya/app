@@ -66,5 +66,23 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+
+	// yay apwrite config lets see if this works!
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.example.breadcrumbsOfficial</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>appwrite-callback-6a46a91700051cda76aa</string>
+			</array>
+		</dict>
+	</array>
+
+
+
 </dict>
 </plist>
