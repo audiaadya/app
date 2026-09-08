@@ -58,7 +58,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
 
           final user = snapshot.data!;
-          final initials = (user.name ?? 'User').trim().split(RegExp(r'\s+')).take(2).map((part) => part[0].toUpperCase()).join();
+          final displayName = user.name.isNotEmpty ? user.name : 'User';
+          final initials = displayName
+              .trim()
+              .split(RegExp(r'\s+'))
+              .take(2)
+              .map((part) => part[0].toUpperCase())
+              .join();
 
           return Padding(
             padding: const EdgeInsets.all(24),
@@ -94,7 +100,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 22),
                 Text(
-                  user.name ?? 'User',
+                  displayName,
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -103,7 +109,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  user.email ?? 'No email',
+                  user.email.isNotEmpty ? user.email : 'No email',
                   style: const TextStyle(
                     fontSize: 16,
                     color: Color(0xFF6B7280),

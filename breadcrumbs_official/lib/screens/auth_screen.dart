@@ -30,30 +30,43 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_isSubmitting) return;
 
     setState(() => _isSubmitting = true);
 
     try {
+      final email = _emailController.text.trim().toLowerCase();
+      final password = _passwordController.text;
+
       if (_isLogin) {
         await AppwriteService.signIn(
-          email: _emailController.text,
-          password: _passwordController.text,
+          email: email,
+          password: password,
         );
-      } else {
-        await AppwriteService.signUp(
-          name: _nameController.text,
-          email: _emailController.text,
-          password: _passwordController.text,
-        );
+
+        if (!mounted) return;
+        widget.onAuthenticated?.call();
+        return;
       }
+
+      await AppwriteService.signUp(
+        name: _nameController.text.trim(),
+        email: email,
+        password: password,
+      );
 
       if (!mounted) return;
       widget.onAuthenticated?.call();
     } catch (error) {
       if (!mounted) return;
+      final message = error.toString();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(error.toString()),
+          content: Text(
+            message.contains('already exists')
+                ? 'This email is already registered. Please sign in or use a different email.'
+                : message,
+          ),
           backgroundColor: Colors.red.shade700,
         ),
       );
