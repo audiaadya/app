@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  final VoidCallback onSignOut;
+
+  const ProfileScreen({super.key, required this.onSignOut});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Profile')),
-      body: const Center(child: Text('Profile page — edit this in lib/screens/profile.dart')),
+      body: Center(
+        child: ElevatedButton.icon(
+          onPressed: onSignOut,
+          icon: const Icon(Icons.logout),
+          label: const Text('Sign Out'),
+        ),
+      ),
     );
   }
 }

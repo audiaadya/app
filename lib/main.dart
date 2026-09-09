@@ -1,9 +1,10 @@
+import 'package:concentric_transition/concentric_transition.dart';
 import 'package:flutter/material.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'intro_slider.dart';
 import 'screens/home.dart';
+import 'screens/auth_screen.dart';
 import 'screens/likes.dart';
 import 'screens/profile.dart';
 import 'screens/search.dart';
@@ -26,6 +27,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late bool _showIntro;
+  bool _isAuthenticated = false;
 
   @override
   void initState() {
@@ -44,6 +46,18 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void _handleAuthenticated() {
+    setState(() {
+      _isAuthenticated = true;
+    });
+  }
+
+  void _handleSignOut() {
+    setState(() {
+      _isAuthenticated = false;
+    });
+  }
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -51,10 +65,13 @@ class _MyAppState extends State<MyApp> {
       title: 'Bookmarks Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
       ),
       home: _showIntro
           ? IntroScreen(onDonePress: _completeIntro)
-          : const HomeScaffold(),
+          : _isAuthenticated
+              ? HomeScaffold(onSignOut: _handleSignOut)
+              : AuthScreen(onAuthenticated: _handleAuthenticated),
     );
   }
 }
@@ -66,51 +83,147 @@ class IntroScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final slides = [
-      const ContentConfig(
-        title: 'Welcome to Breadcrumbs!',
-        description: 'All the links you save on your desktop browser with the extension will appear on this app.',
-        backgroundColor: Color(0xFF4C5BA6),
-        styleTitle: TextStyle(color: Colors.white, fontSize: 30),
-        styleDescription: TextStyle(color: Colors.white70, fontSize: 18),
-      ),
-      const ContentConfig(
-        title: 'Explore Your Interests',
-        description: 'You can explore your saved links through your already organized interests and groups in your personalized mind map and see how much engagement you have with each topic.',
-        backgroundColor: Color(0xFF8A4AA8),
-        styleTitle: TextStyle(color: Colors.white, fontSize: 30),
-        styleDescription: TextStyle(color: Colors.white70, fontSize: 18),
-      ),
-      const ContentConfig(
-        title: 'Discover Your Future',
-        description: 'Chat with our personalized AI assistant to discover new interests, recommendations, insights, and opportunities based on your saved links.',
-        backgroundColor: Color.fromARGB(255, 168, 74, 159),
-        styleTitle: TextStyle(color: Colors.white, fontSize: 30),
-        styleDescription: TextStyle(color: Colors.white70, fontSize: 18),
-      ),
-      const ContentConfig(
-        title: 'Ready to Understand Yourself?',
-        description: 'Tap DONE to open your dashboard.',
-        backgroundColor: Color(0xFFCE5D8D),
-        styleTitle: TextStyle(color: Colors.white, fontSize: 30),
-        styleDescription: TextStyle(color: Colors.white70, fontSize: 18),
-      ),
-    ];
+    return ConcentricAnimationOnboarding(onDonePress: onDonePress);
+  }
+}
 
-    return IntroSlider(
-      key: const ValueKey('intro_slider'),
-      listContentConfig: slides,
-      renderNextBtn: const Text('NEXT'),
-      renderDoneBtn: const Text('DONE'),
-      renderSkipBtn: const Text('SKIP'),
-      onDonePress: onDonePress,
-      onSkipPress: onDonePress,
+class ConcentricAnimationOnboarding extends StatelessWidget {
+  final VoidCallback onDonePress;
+
+  const ConcentricAnimationOnboarding({super.key, required this.onDonePress});
+
+  static const List<PageData> pages = [
+    PageData(
+      icon: Icons.bookmark_add_outlined,
+      title: 'Save the links you care about',
+      subtitle: 'Tap the circle to move into the next slide.',
+      bgColor: Color(0xFF3B1791),
+      textColor: Colors.white,
+    ),
+    PageData(
+      icon: Icons.account_tree_outlined,
+      title: 'See them organized by topic',
+      subtitle: 'Your bookmarks become a visual map of interests.',
+      bgColor: Color(0xFFFAB800),
+      textColor: Color(0xFF3B1790),
+    ),
+    PageData(
+      icon: Icons.auto_awesome,
+      title: 'Explore with AI insights',
+      subtitle: 'Finish onboarding to open your dashboard.',
+      bgColor: Color(0xFFFFFFFF),
+      textColor: Color(0xFF3B1790),
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    return Scaffold(
+      body: ConcentricPageView(
+        colors: pages.map((page) => page.bgColor).toList(),
+        itemCount: pages.length,
+        onFinish: onDonePress,
+        radius: screenWidth * 0.11,
+        scaleFactor: 2,
+        verticalPosition: 0.84,
+        nextButtonBuilder: (context) => Container(
+          width: screenWidth * 0.16,
+          height: screenWidth * 0.16,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white,
+          ),
+          child: const Icon(Icons.navigate_next, color: Color(0xFF3B1791)),
+        ),
+        itemBuilder: (index) {
+          final page = pages[index];
+          return SafeArea(
+            child: _ConcentricPage(page: page),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class PageData {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color bgColor;
+  final Color textColor;
+
+  const PageData({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.bgColor,
+    required this.textColor,
+  });
+}
+
+class _ConcentricPage extends StatelessWidget {
+  final PageData page;
+
+  const _ConcentricPage({required this.page});
+
+  @override
+  Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final circleColor = page.textColor == Colors.white ? Colors.white : Colors.black;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: circleColor,
+          ),
+          child: Icon(
+            page.icon,
+            size: screenHeight * 0.11,
+            color: page.bgColor,
+          ),
+        ),
+        const SizedBox(height: 28),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 28),
+          child: Text(
+            page.title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: page.textColor,
+              fontSize: screenHeight * 0.035,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.2,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 34),
+          child: Text(
+            page.subtitle,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: page.textColor.withOpacity(0.84),
+              fontSize: screenHeight * 0.018,
+              height: 1.4,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
 
 class HomeScaffold extends StatefulWidget {
-  const HomeScaffold({super.key});
+  final VoidCallback onSignOut;
+
+  const HomeScaffold({super.key, required this.onSignOut});
 
   @override
   State<HomeScaffold> createState() => _HomeScaffoldState();
@@ -135,7 +248,7 @@ class _HomeScaffoldState extends State<HomeScaffold> {
         body = const SearchScreen();
         break;
       default:
-        body = const ProfileScreen();
+        body = ProfileScreen(onSignOut: widget.onSignOut);
     }
 
     return Scaffold(
