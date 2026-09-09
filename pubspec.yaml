@@ -31,9 +31,10 @@ dependencies:
   flutter:
     sdk: flutter
   
-  # for the intro slider
-  intro_slider: ^4.2.5
   shared_preferences: ^2.2.2
+  concentric_transition: ^1.0.3
+
+  
 
   # for the mind map
   mind_map:
@@ -45,7 +46,6 @@ dependencies:
   cupertino_icons: ^1.0.8
   salomon_bottom_bar: ^3.3.1
   appwrite: ^17.1.0
-  concentric_transition: ^1.0.3
 
 dev_dependencies:
   flutter_test:
