@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'screens/auth_screen.dart';
 import 'screens/home.dart';
 import 'screens/likes.dart';
+import 'screens/learninggoals.dart';
 import 'screens/profile.dart';
-import 'screens/search.dart';
+import 'screens/ai.dart';
 import 'services/appwrite_service.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
@@ -63,9 +65,17 @@ class _MyAppState extends State<MyApp> {
     if (!mounted) {
       return;
     }
+
     setState(() {
       _showIntro = false;
     });
+  }
+
+  ThemeData _appTheme() {
+    return ThemeData(
+      colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      textTheme: GoogleFonts.plusJakartaSansTextTheme(),
+    );
   }
 
   @override
@@ -74,9 +84,7 @@ class _MyAppState extends State<MyApp> {
       return MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Bookmarks Demo',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        ),
+        theme: _appTheme(),
         home: IntroScreen(onDonePress: _completeIntro),
       );
     }
@@ -85,23 +93,15 @@ class _MyAppState extends State<MyApp> {
       return MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Bookmarks Demo',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        ),
-        home: const Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(),
-          ),
-        ),
+        theme: _appTheme(),
+        home: const Scaffold(body: Center(child: CircularProgressIndicator())),
       );
     }
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Bookmarks Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      theme: _appTheme(),
       home: _isAuthenticated
           ? const HomeScaffold()
           : AuthScreen(
@@ -127,59 +127,6 @@ class IntroScreen extends StatelessWidget {
   }
 }
 
-
-final pages = [
-  const PageData(
-    icon: Icons.food_bank_outlined,
-    title: "Compile your list of bookmarks through your browser",
-    bgColor: Color(0xff3b1791),
-    textColor: Colors.white,
-  ),
-  const PageData(
-    icon: Icons.shopping_bag_outlined,
-    title: "Add it to cart",
-    bgColor: Color(0xfffab800),
-    textColor: Color(0xff3b1790),
-  ),
-  const PageData(
-    icon: Icons.delivery_dining,
-    title: "Order and wait",
-    bgColor: Color(0xffffffff),
-    textColor: Color(0xff3b1790),
-  ),
-];
-
-class ConcentricAnimationOnboarding extends StatelessWidget {
-  const ConcentricAnimationOnboarding({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    return Scaffold(
-      body: ConcentricPageView(
-        colors: pages.map((p) => p.bgColor).toList(),
-        radius: screenWidth * 0.1,
-        nextButtonBuilder: (context) => Padding(
-          padding: const EdgeInsets.only(left: 3), // visual center
-          child: Icon(Icons.navigate_next, size: screenWidth * 0.08),
-        ),
-        // enable itemcount to disable infinite scroll
-        // itemCount: pages.length,
-        // opacityFactor: 2.0,
-        scaleFactor: 2,
-        // verticalPosition: 0.7,
-        // direction: Axis.vertical,
-        // itemCount: pages.length,
-        // physics: NeverScrollableScrollPhysics(),
-        itemBuilder: (index) {
-          final page = pages[index % pages.length];
-          return SafeArea(child: _Page(page: page));
-        },
-      ),
-    );
-  }
-}
-
 class PageData {
   final String? title;
   final IconData? icon;
@@ -202,33 +149,42 @@ class _Page extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(16.0),
-          margin: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: page.textColor,
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: page.bgColor,
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: page.textColor,
+            ),
+            child: Icon(
+              page.icon,
+              size: screenHeight * 0.1,
+              color: page.bgColor,
+            ),
           ),
-          child: Icon(page.icon, size: screenHeight * 0.1, color: page.bgColor),
-        ),
-        Text(
-          page.title ?? "",
-          style: TextStyle(
-            color: page.textColor,
-            fontSize: screenHeight * 0.035,
-            fontWeight: FontWeight.bold,
+          const SizedBox(height: 24),
+          Text(
+            page.title ?? '',
+            style: TextStyle(
+              color: page.textColor,
+              fontSize: screenHeight * 0.035,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
-
-/*
 
 final pages = [
   const PageData(
@@ -314,9 +270,9 @@ class _ConcentricAnimationOnboardingState
                 onPressed: _currentPage == 0
                     ? null
                     : () => _pageController.previousPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        ),
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      ),
                 child: const Text('Back'),
               ),
               Row(
@@ -341,61 +297,6 @@ class _ConcentricAnimationOnboardingState
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-*/
-class PageData {
-  final String? title;
-  final IconData? icon;
-  final Color bgColor;
-  final Color textColor;
-
-  const PageData({
-    this.title,
-    this.icon,
-    this.bgColor = Colors.white,
-    this.textColor = Colors.black,
-  });
-}
-
-class _Page extends StatelessWidget {
-  final PageData page;
-
-  const _Page({required this.page});
-
-  @override
-  Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      color: page.bgColor,
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            margin: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: page.textColor,
-            ),
-            child: Icon(page.icon, size: screenHeight * 0.1, color: page.bgColor),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            page.title ?? '',
-            style: TextStyle(
-              color: page.textColor,
-              fontSize: screenHeight * 0.035,
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
       ),
     );
   }
@@ -426,6 +327,9 @@ class _HomeScaffoldState extends State<HomeScaffold> {
       case 2:
         body = const SearchScreen();
         break;
+      case 3:
+        body = const LearningGoalsScreen();
+        break;
       default:
         body = const ProfileScreen();
     }
@@ -448,9 +352,19 @@ class _HomeScaffoldState extends State<HomeScaffold> {
             title: const Text('Likes'),
             selectedColor: accent,
           ),
+                     SalomonBottomBarItem(
+            icon: const Icon(Icons.auto_awesome),
+            title: const Text('Learning Goals'),
+            selectedColor: accent,
+          ),
           SalomonBottomBarItem(
             icon: const Icon(Icons.grid_view),
-            title: const Text('Explore'),
+            title: const Text('AI Chat'),
+            selectedColor: accent,
+          ),
+          SalomonBottomBarItem(
+            icon: const Icon(Icons.checklist),
+            title: const Text('Goals'),
             selectedColor: accent,
           ),
           SalomonBottomBarItem(
@@ -458,6 +372,7 @@ class _HomeScaffoldState extends State<HomeScaffold> {
             title: const Text('Profile'),
             selectedColor: accent,
           ),
+         
         ],
       ),
     );

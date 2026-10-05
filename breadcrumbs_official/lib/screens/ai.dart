@@ -27,11 +27,10 @@ class AiChat extends StatefulWidget {
 class _AiChatState extends State<AiChat> {
   final _controller = TextEditingController();
   final _messages = <_Msg>[
-    const _Msg('Give me three ideas for a weekend project in Flutter.', true),
+    const _Msg('Explain my activity for this week.', true),
     const _Msg(
-        'Sure! Here are three: 1) A habit tracker with streaks, 2) a Markdown notes app with live preview, and 3) a small budgeting dashboard. Want me to sketch the architecture for one?',
+        'Sure! You spent 3 hours on Physics Olympiad prep, 2 hours on AMC practice, and 1 hour on AP Biology review. You also bookmarked several resources on robotics for future reference. Would you like me to recommend activities and resources for next week based on your interests?',
         false),
-    const _Msg('The budgeting dashboard sounds fun.', true),
   ];
   bool _typing = true;
 
@@ -54,7 +53,7 @@ class _AiChatState extends State<AiChat> {
       setState(() {
         _typing = false;
         _messages.add(const _Msg(
-            'Great choice. Start with a Scaffold, a monthly summary card, and a categorized transaction list backed by a simple model.',
+            'Based off what you engaged with last week, you should focus on practicing more physics problems and reviewing AP Biology concepts. I recommend checking out the Physics Olympiad resources you bookmarked and spending some time on the AP Biology Penguins website for additional practice.',
             false));
       });
     });
