@@ -1,4 +1,5 @@
 import 'package:appwrite/appwrite.dart';
+import 'package:flutter/foundation.dart';
 
 Future<void> main() async {
   final client = Client()
@@ -10,7 +11,7 @@ Future<void> main() async {
   const email = 'copilot.demo.user@example.com';
   const password = 'Password123!';
 
-  print('Attempting Appwrite signup...');
+  debugPrint('Attempting Appwrite signup...');
 
   try {
     final user = await account.create(
@@ -20,12 +21,12 @@ Future<void> main() async {
       name: 'Copilot Demo User',
     );
 
-    print('SUCCESS');
-    print('userId=${user.$id}');
-    print('email=${user.email}');
+    debugPrint('SUCCESS');
+    debugPrint('userId=${user.$id}');
+    debugPrint('email=${user.email}');
   } catch (error) {
-    print('ERROR');
-    print(error);
+    debugPrint('ERROR');
+    debugPrint('$error');
     rethrow;
   }
 }

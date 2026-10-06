@@ -1,380 +1,396 @@
+// for da cool intro
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+
+import 'package:concentric_transition/concentric_transition.dart';
+
+// for da cool bottom nav bar
+import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'screens/auth_screen.dart';
+// initializing all the diff screens
 import 'screens/home.dart';
+import 'screens/auth_screen.dart';
 import 'screens/likes.dart';
-import 'screens/learninggoals.dart';
 import 'screens/profile.dart';
-import 'screens/ai.dart';
-import 'services/appwrite_service.dart';
-import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
+import 'screens/search.dart';
 
+// where everything starts!
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await AppwriteService.configureClient();
-
-  final prefs = await SharedPreferences.getInstance();
-  final isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
-
-  runApp(MyApp(initialFirstLaunch: isFirstLaunch));
+ WidgetsFlutterBinding.ensureInitialized();
+ await initNotifications();
+ final prefs = await SharedPreferences.getInstance();
+ final isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
+ await scheduleFilmingNotification(hour: 10, minute: 30);
+ runApp(MyApp(initialFirstLaunch: isFirstLaunch));
 }
+
 
 class MyApp extends StatefulWidget {
-  final bool initialFirstLaunch;
+ final bool initialFirstLaunch;
 
-  const MyApp({super.key, this.initialFirstLaunch = true});
 
-  @override
-  State<MyApp> createState() => _MyAppState();
+ const MyApp({super.key, this.initialFirstLaunch = true});
+
+
+ @override
+ State<MyApp> createState() => _MyAppState();
 }
+
 
 class _MyAppState extends State<MyApp> {
-  late bool _showIntro;
-  bool _isCheckingAuth = true;
-  bool _isAuthenticated = false;
+ late bool _showIntro;
+ bool _isAuthenticated = false;
 
+// have you opened the app before? if not, show the intro screen. if yes, show the home screen.
+ @override
+ void initState() {
+   super.initState();
+   _showIntro = widget.initialFirstLaunch;
+  _isAuthenticated = !widget.initialFirstLaunch;
+ }
+
+
+ Future<void> _completeIntro() async {
+   final prefs = await SharedPreferences.getInstance();
+   await prefs.setBool('isFirstLaunch', false);
+   if (!mounted) {
+     return;
+   }
+   setState(() {
+     _showIntro = false;
+   });
+ }
+
+
+ void _handleAuthenticated() {
+   setState(() {
+     _isAuthenticated = true;
+   });
+ }
+
+
+ void _handleSignOut() {
+   setState(() {
+     _isAuthenticated = false;
+   });
+ }
   @override
-  void initState() {
-    super.initState();
-    _showIntro = widget.initialFirstLaunch;
-    _checkSession();
-  }
-
-  Future<void> _checkSession() async {
-    try {
-      await AppwriteService.getCurrentUser();
-      if (!mounted) return;
-      setState(() {
-        _isAuthenticated = true;
-        _isCheckingAuth = false;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _isAuthenticated = false;
-        _isCheckingAuth = false;
-      });
-    }
-  }
-
-  Future<void> _completeIntro() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isFirstLaunch', false);
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      _showIntro = false;
-    });
-  }
-
-  ThemeData _appTheme() {
-    return ThemeData(
-      colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      textTheme: GoogleFonts.plusJakartaSansTextTheme(),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_showIntro) {
-      return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Bookmarks Demo',
-        theme: _appTheme(),
-        home: IntroScreen(onDonePress: _completeIntro),
-      );
-    }
-
-    if (_isCheckingAuth) {
-      return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Bookmarks Demo',
-        theme: _appTheme(),
-        home: const Scaffold(body: Center(child: CircularProgressIndicator())),
-      );
-    }
-
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Bookmarks Demo',
-      theme: _appTheme(),
-      home: _isAuthenticated
-          ? const HomeScaffold()
-          : AuthScreen(
-              onAuthenticated: () {
-                setState(() {
-                  _isAuthenticated = true;
-                  _isCheckingAuth = false;
-                });
-              },
-            ),
-    );
-  }
+  // where the actual code for the onboarding begins
+ Widget build(BuildContext context) {
+   return MaterialApp(
+     debugShowCheckedModeBanner: false,
+     title: 'Bookmarks Demo',
+     theme: ThemeData(
+       colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+       useMaterial3: true,
+     ),
+     home: _showIntro
+         ? IntroScreen(onDonePress: _completeIntro)
+         : _isAuthenticated
+             ? HomeScaffold(onSignOut: _handleSignOut)
+             : AuthScreen(onAuthenticated: _handleAuthenticated),
+   );
+ }
 }
+
 
 class IntroScreen extends StatelessWidget {
-  final VoidCallback onDonePress;
+ final VoidCallback onDonePress;
 
-  const IntroScreen({super.key, required this.onDonePress});
 
-  @override
-  Widget build(BuildContext context) {
-    return ConcentricAnimationOnboarding(onDonePress: onDonePress);
-  }
+ const IntroScreen({super.key, required this.onDonePress});
+
+
+ @override
+ Widget build(BuildContext context) {
+   return ConcentricAnimationOnboarding(onDonePress: onDonePress);
+ }
 }
+
+
+class ConcentricAnimationOnboarding extends StatelessWidget {
+ final VoidCallback onDonePress;
+
+
+ const ConcentricAnimationOnboarding({super.key, required this.onDonePress});
+
+
+ static const List<PageData> pages = [
+   PageData(
+     icon: Icons.bookmark_add_outlined,
+     title: 'Welcome to Breadcrumbs',
+     subtitle: 'Tap the circle to move into the next slide.',
+     bgColor: Color(0xFF3B1791),
+     textColor: Colors.white,
+   ),
+   PageData(
+     icon: Icons.account_tree_outlined,
+     title: 'See them organized by topic',
+     subtitle: 'Your bookmarks become a visual map of interests.',
+     bgColor: Color(0xFFFAB800),
+     textColor: Color(0xFF3B1790),
+   ),
+   PageData(
+     icon: Icons.auto_awesome,
+     title: 'Explore with AI insights',
+     subtitle: 'Finish onboarding to open your dashboard.',
+     bgColor: Color(0xFFFFFFFF),
+     textColor: Color(0xFF3B1790),
+   ),
+ ];
+
+// just some general styling for the concentric animation onboarding screen
+ @override
+ Widget build(BuildContext context) {
+   final screenWidth = MediaQuery.of(context).size.width;
+   return Scaffold(
+     body: ConcentricPageView(
+       colors: pages.map((page) => page.bgColor).toList(),
+       itemCount: pages.length,
+       onFinish: onDonePress,
+       radius: screenWidth * 0.11,
+       scaleFactor: 2,
+       verticalPosition: 0.84,
+       nextButtonBuilder: (context) => Container(
+         width: screenWidth * 0.16,
+         height: screenWidth * 0.16,
+         decoration: const BoxDecoration(
+           shape: BoxShape.circle,
+           color: Colors.white,
+         ),
+         child: const Icon(Icons.navigate_next, color: Color(0xFF3B1791)),
+       ),
+       itemBuilder: (index) {
+         final page = pages[index];
+         return SafeArea(
+           child: _ConcentricPage(page: page),
+         );
+       },
+     ),
+   );
+ }
+}
+
 
 class PageData {
-  final String? title;
-  final IconData? icon;
-  final Color bgColor;
-  final Color textColor;
+ final String title;
+ final String subtitle;
+ final IconData icon;
+ final Color bgColor;
+ final Color textColor;
 
-  const PageData({
-    this.title,
-    this.icon,
-    this.bgColor = Colors.white,
-    this.textColor = Colors.black,
-  });
+
+ const PageData({
+   required this.title,
+   required this.subtitle,
+   required this.icon,
+   required this.bgColor,
+   required this.textColor,
+ });
 }
 
-class _Page extends StatelessWidget {
-  final PageData page;
 
-  const _Page({required this.page});
+class _ConcentricPage extends StatelessWidget {
+ final PageData page;
 
-  @override
-  Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      color: page.bgColor,
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            margin: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: page.textColor,
-            ),
-            child: Icon(
-              page.icon,
-              size: screenHeight * 0.1,
-              color: page.bgColor,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            page.title ?? '',
-            style: TextStyle(
-              color: page.textColor,
-              fontSize: screenHeight * 0.035,
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
+
+ const _ConcentricPage({required this.page});
+
+
+ @override
+ Widget build(BuildContext context) {
+   final screenHeight = MediaQuery.of(context).size.height;
+   final circleColor = page.textColor == Colors.white ? Colors.white : Colors.black;
+
+// just some alignment and styling
+   return Column(
+     mainAxisAlignment: MainAxisAlignment.center,
+     children: [
+       Container(
+         padding: const EdgeInsets.all(18),
+         decoration: BoxDecoration(
+           shape: BoxShape.circle,
+           color: circleColor,
+         ),
+         child: Icon(
+           page.icon,
+           size: screenHeight * 0.11,
+           color: page.bgColor,
+         ),
+       ),
+       const SizedBox(height: 28),
+       Padding(
+         padding: const EdgeInsets.symmetric(horizontal: 28),
+         child: Text(
+           page.title,
+           textAlign: TextAlign.center,
+           style: TextStyle(
+             color: page.textColor,
+             fontSize: screenHeight * 0.035,
+             fontWeight: FontWeight.w800,
+             letterSpacing: -0.2,
+           ),
+         ),
+       ),
+       const SizedBox(height: 16),
+       Padding(
+         padding: const EdgeInsets.symmetric(horizontal: 34),
+         child: Text(
+           page.subtitle,
+           textAlign: TextAlign.center,
+           style: TextStyle(
+             color: page.textColor.withValues(alpha: 0.84),
+             fontSize: screenHeight * 0.018,
+             height: 1.4,
+           ),
+         ),
+       ),
+     ],
+   );
+ }
 }
 
-final pages = [
-  const PageData(
-    icon: Icons.food_bank_outlined,
-    title: 'Compile your list of bookmarks through your browser',
-    bgColor: Color.fromARGB(255, 96, 131, 185),
-    textColor: Colors.white,
-  ),
-  const PageData(
-    icon: Icons.shopping_bag_outlined,
-    title: 'Sync it to the app to see real time data about your interests',
-    bgColor: Color.fromARGB(255, 71, 74, 109),
-    textColor: Color(0xff3b1790),
-  ),
-  const PageData(
-    icon: Icons.delivery_dining,
-    title: 'Review and save your favorites',
-    bgColor: Color.fromARGB(255, 92, 60, 115),
-    textColor: Color.fromARGB(255, 255, 255, 255),
-  ),
-  const PageData(
-    icon: Icons.check_circle_outline,
-    title: 'Order and wait',
-    bgColor: Color.fromARGB(255, 170, 103, 170),
-    textColor: Color.fromARGB(255, 255, 255, 255),
-  ),
-];
-
-class ConcentricAnimationOnboarding extends StatefulWidget {
-  final VoidCallback onDonePress;
-
-  const ConcentricAnimationOnboarding({super.key, required this.onDonePress});
-
-  @override
-  State<ConcentricAnimationOnboarding> createState() =>
-      _ConcentricAnimationOnboardingState();
-}
-
-class _ConcentricAnimationOnboardingState
-    extends State<ConcentricAnimationOnboarding> {
-  final PageController _pageController = PageController();
-  int _currentPage = 0;
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  void _nextPage() {
-    final nextIndex = _currentPage + 1;
-    if (nextIndex < pages.length) {
-      _pageController.animateToPage(
-        nextIndex,
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOut,
-      );
-      return;
-    }
-
-    widget.onDonePress();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: PageView.builder(
-        controller: _pageController,
-        itemCount: pages.length,
-        onPageChanged: (index) => setState(() => _currentPage = index),
-        itemBuilder: (context, index) {
-          final page = pages[index];
-          return _Page(page: page);
-        },
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TextButton(
-                onPressed: _currentPage == 0
-                    ? null
-                    : () => _pageController.previousPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      ),
-                child: const Text('Back'),
-              ),
-              Row(
-                children: List.generate(pages.length, (index) {
-                  final active = index == _currentPage;
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: active ? 18 : 8,
-                    height: 8,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    decoration: BoxDecoration(
-                      color: active ? Colors.deepPurple : Colors.grey,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  );
-                }),
-              ),
-              ElevatedButton(
-                onPressed: _nextPage,
-                child: Text(_currentPage == pages.length - 1 ? 'Done' : 'Next'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class HomeScaffold extends StatefulWidget {
-  const HomeScaffold({super.key});
+ final VoidCallback onSignOut;
 
-  @override
-  State<HomeScaffold> createState() => _HomeScaffoldState();
+
+ const HomeScaffold({super.key, required this.onSignOut});
+
+
+ @override
+ State<HomeScaffold> createState() => _HomeScaffoldState();
 }
+
 
 class _HomeScaffoldState extends State<HomeScaffold> {
-  int _selectedIndex = 0;
+ int _selectedIndex = 0;
 
-  @override
-  Widget build(BuildContext context) {
-    const accent = Color.fromARGB(255, 77, 67, 162);
 
-    Widget body;
-    switch (_selectedIndex) {
-      case 0:
-        body = const HomeScreen();
-        break;
-      case 1:
-        body = const LikesScreen();
-        break;
-      case 2:
-        body = const SearchScreen();
-        break;
-      case 3:
-        body = const LearningGoalsScreen();
-        break;
-      default:
-        body = const ProfileScreen();
-    }
+ @override
+ Widget build(BuildContext context) {
+   const accent = Color.fromARGB(255, 77, 67, 162);
 
-    return Scaffold(
-      body: body,
-      bottomNavigationBar: SalomonBottomBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) => setState(() => _selectedIndex = index),
-        selectedItemColor: const Color.fromARGB(255, 104, 14, 92),
-        unselectedItemColor: const Color.fromARGB(179, 122, 114, 158),
-        items: [
-          SalomonBottomBarItem(
-            icon: const Icon(Icons.home),
-            title: const Text('Home'),
-            selectedColor: accent,
-          ),
-          SalomonBottomBarItem(
-            icon: const Icon(Icons.favorite_border),
-            title: const Text('Likes'),
-            selectedColor: accent,
-          ),
-                     SalomonBottomBarItem(
-            icon: const Icon(Icons.auto_awesome),
-            title: const Text('Learning Goals'),
-            selectedColor: accent,
-          ),
-          SalomonBottomBarItem(
-            icon: const Icon(Icons.grid_view),
-            title: const Text('AI Chat'),
-            selectedColor: accent,
-          ),
-          SalomonBottomBarItem(
-            icon: const Icon(Icons.checklist),
-            title: const Text('Goals'),
-            selectedColor: accent,
-          ),
-          SalomonBottomBarItem(
-            icon: const Icon(Icons.person),
-            title: const Text('Profile'),
-            selectedColor: accent,
-          ),
-         
-        ],
-      ),
-    );
-  }
+
+   Widget body;
+   switch (_selectedIndex) {
+     case 0:
+       body = const HomeScreen();
+       break;
+     case 1:
+       body = const LikesScreen();
+       break;
+     case 2:
+       body = const SearchScreen();
+       break;
+     default:
+       body = ProfileScreen(onSignOut: widget.onSignOut);
+   }
+
+
+   return Scaffold(
+     body: body,
+     bottomNavigationBar: SalomonBottomBar(
+       currentIndex: _selectedIndex,
+       onTap: (index) => setState(() => _selectedIndex = index),
+       selectedItemColor: const Color.fromARGB(255, 104, 14, 92),
+       unselectedItemColor: const Color.fromARGB(179, 122, 114, 158),
+       items: [
+         SalomonBottomBarItem(
+           icon: const Icon(Icons.home),
+           title: const Text('Home'),
+           selectedColor: accent,
+         ),
+         SalomonBottomBarItem(
+           icon: const Icon(Icons.favorite_border),
+           title: const Text('Likes'),
+           selectedColor: accent,
+         ),
+         SalomonBottomBarItem(
+           icon: const Icon(Icons.grid_view),
+           title: const Text('Explore'),
+           selectedColor: accent,
+         ),
+         SalomonBottomBarItem(
+           icon: const Icon(Icons.person),
+           title: const Text('Profile'),
+           selectedColor: accent,
+         ),
+       ],
+     ),
+   );
+ }
 }
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+int targetHour = 20;
+int targetMinute = 34;
+
+Future<void> initNotifications() async {
+  tz.initializeTimeZones();
+
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  const DarwinInitializationSettings initializationSettingsDarwin =
+      DarwinInitializationSettings();
+
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+    iOS: initializationSettingsDarwin,
+  );
+
+  await flutterLocalNotificationsPlugin.initialize(
+    settings: initializationSettings,
+  );
+}
+
+Future<void> scheduleFilmingNotification({int? hour, int? minute}) async {
+  if (hour != null) targetHour = hour;
+  if (minute != null) targetMinute = minute;
+
+  await flutterLocalNotificationsPlugin.cancel(id: 0);
+
+  final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+  tz.TZDateTime scheduledDate = tz.TZDateTime(
+    tz.local,
+    now.year,
+    now.month,
+    now.day,
+    targetHour,
+    targetMinute,
+  );
+
+  if (scheduledDate.isBefore(now)) {
+    scheduledDate = scheduledDate.add(const Duration(days: 1));
+  }
+
+  await flutterLocalNotificationsPlugin.zonedSchedule(
+    id: 0,
+    title: 'Activity Update',
+    body: '''It's now been 2 weeks since you last engaged with your saved robotics content. Time to get back at it! ''',
+    scheduledDate: scheduledDate,
+    notificationDetails: const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'filming_channel',
+        'Filming Reminders',
+        importance: Importance.max,
+        priority: Priority.high,
+      ),
+      iOS: DarwinNotificationDetails(),
+    ),
+    androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+  );
+}
+
+Future<void> delayByMinutes(int minutes) async {
+  final newTime = DateTime.now().add(Duration(minutes: minutes));
+  await scheduleFilmingNotification(hour: newTime.hour, minute: newTime.minute);
+}
+
+

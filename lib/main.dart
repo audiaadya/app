@@ -209,7 +209,7 @@ class _ConcentricPage extends StatelessWidget {
             page.subtitle,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: page.textColor.withOpacity(0.84),
+              color: page.textColor.withValues(alpha: 0.84),
               fontSize: screenHeight * 0.018,
               height: 1.4,
             ),

@@ -5,7 +5,9 @@ import '../services/appwrite_service.dart';
 import 'auth_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final VoidCallback? onSignOut;
+
+  const ProfileScreen({super.key, this.onSignOut});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -26,6 +28,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } catch (_) {
       // ignore session shutdown issues and continue to auth screen
     }
+
+    widget.onSignOut?.call();
 
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(

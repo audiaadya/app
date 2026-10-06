@@ -193,7 +193,9 @@ class _TypingDotsState extends State<_TypingDots>
               margin: const EdgeInsets.symmetric(horizontal: 3),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: color.withOpacity(0.4 + 0.6 * (1 - (t - 0.5).abs() * 2)),
+                color: color.withValues(
+                  alpha: 0.4 + 0.6 * (1 - (t - 0.5).abs() * 2),
+                ),
               ),
             );
           }),

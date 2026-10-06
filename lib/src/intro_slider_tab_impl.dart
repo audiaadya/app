@@ -106,10 +106,10 @@ class IntroSliderTab extends StatelessWidget {
               fit: contentConfig?.backgroundImageFit ?? BoxFit.cover,
               colorFilter: ColorFilter.mode(
                 backgroundFilterColor != null
-                    ? backgroundFilterColor.withOpacity(
-                        contentConfig?.backgroundFilterOpacity ?? 0.5)
-                    : Colors.black.withOpacity(
-                        contentConfig?.backgroundFilterOpacity ?? 0.5),
+                    ? backgroundFilterColor.withValues(
+                        alpha: contentConfig?.backgroundFilterOpacity ?? 0.5)
+                    : Colors.black.withValues(
+                        alpha: contentConfig?.backgroundFilterOpacity ?? 0.5),
                 contentConfig?.backgroundBlendMode ?? BlendMode.darken,
               ),
             )),
