@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  static const bookmarkCardColors = [Color(0xFF6672AA), Color(0xFFB872A5)];
+
   static const categories = <_Category>[
     _Category(title: 'School & Access', items: ['♡ classlink']),
     _Category(
@@ -63,12 +65,14 @@ class HomeScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          ...categories.map(
-                            (category) => Padding(
+                          ...categories.asMap().entries.map(
+                            (entry) => Padding(
                               padding: const EdgeInsets.only(bottom: 10),
                               child: _CategoryCard(
-                                category: category,
-                                color: cardColor,
+                                category: entry.value,
+                                color:
+                                    bookmarkCardColors[entry.key %
+                                        bookmarkCardColors.length],
                               ),
                             ),
                           ),

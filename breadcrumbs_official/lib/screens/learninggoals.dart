@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+
 class LearningGoalsScreen extends StatefulWidget {
   const LearningGoalsScreen({super.key});
 
@@ -103,6 +104,14 @@ class _LearningGoalsScreenState extends State<LearningGoalsScreen> {
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

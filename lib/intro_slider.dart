@@ -1,4 +1,4 @@
-library intro_slider;
+library;
 
 export 'src/intro_slider_config.dart';
 export 'src/intro_slider_tab_impl.dart';
