@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'goal_velocity_tracker.dart';
 
 class LearningGoalsScreen extends StatefulWidget {
   const LearningGoalsScreen({super.key});
@@ -30,6 +31,25 @@ class _LearningGoalsScreenState extends State<LearningGoalsScreen> {
           'Your Learning Goals',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: TextButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => GoalVelocityTrackerScreen(
+                      completedGoals: _completedGoals,
+                      totalGoals: _goals.length,
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.speed_outlined),
+              label: const Text('Goal Velocity Tracker'),
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
         child: Scrollbar(
@@ -106,7 +126,7 @@ class _LearningGoalsScreenState extends State<LearningGoalsScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
-        backgroundColor: Colors.blue,
+        backgroundColor: cardColor,
         foregroundColor: Colors.white,
         shape: const CircleBorder(),
         child: const Icon(Icons.add),

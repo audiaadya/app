@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'focus_sprint.dart';
+
 class LikesScreen extends StatelessWidget {
   const LikesScreen({super.key});
 
@@ -73,51 +75,12 @@ class LikesScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: SafeArea(
-        child: Scrollbar(
-          thumbVisibility: true,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final isWide = constraints.maxWidth >= 800;
-                final leftPanel = _BookmarksPanel(
-                  categories: categories,
-                  headerColor: headerColor,
-                );
-                final rightPanel = _AnalyticsPanel(
-                  categories: categories,
-                  cardColor: headerColor,
-                );
-
-                return isWide
-                    ? Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(flex: 5, child: leftPanel),
-                          const SizedBox(width: 16),
-                          Expanded(flex: 6, child: rightPanel),
-                        ],
-                      )
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          leftPanel,
-                          const SizedBox(height: 16),
-                          rightPanel,
-                        ],
-                      );
-              },
-            ),
-          ),
-        ),
-      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
-                'Your generated goals can now be found in your goals page!',
+                '''You've already added your generated goals to your goals page!''',
               ),
             ),
           );
@@ -129,6 +92,55 @@ class LikesScreen extends StatelessWidget {
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final leftPanel = _BookmarksPanel(
+                  categories: categories,
+                  headerColor: headerColor,
+                );
+                final rightPanel = _AnalyticsPanel(
+                  categories: categories,
+                  cardColor: headerColor,
+                );
+
+                if (constraints.maxWidth >= 800) {
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: leftPanel),
+                        const SizedBox(width: 16),
+                        Expanded(child: rightPanel),
+                      ],
+                    ),
+                  );
+                }
+
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      leftPanel,
+                      const SizedBox(height: 24),
+                      rightPanel,
+                    ],
+                  ),
+                );
+              },
+            ),
+            Positioned(
+              top: 16,
+              right: 16,
+              child: const _InsightsSuggestionButton(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -138,8 +150,6 @@ class _BookmarksPanel extends StatelessWidget {
   final Color headerColor;
 
   const _BookmarksPanel({required this.categories, required this.headerColor});
-
-  static const alternateCardColor = Color(0xFFB872A5);
 
   @override
   Widget build(BuildContext context) {
@@ -153,7 +163,9 @@ class _BookmarksPanel extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 10),
             child: _CategoryCard(
               category: entry.value,
-              color: entry.key.isEven ? headerColor : alternateCardColor,
+              color: entry.key.isEven
+                  ? headerColor
+                  : headerColor.withValues(alpha: 0.85),
             ),
           ),
         ),
@@ -162,13 +174,157 @@ class _BookmarksPanel extends StatelessWidget {
   }
 }
 
-class _AnalyticsPanel extends StatelessWidget {
+class _InsightsSuggestionButton extends StatefulWidget {
+  const _InsightsSuggestionButton();
+
+  @override
+  State<_InsightsSuggestionButton> createState() =>
+      _InsightsSuggestionButtonState();
+}
+
+class _InsightsSuggestionButtonState extends State<_InsightsSuggestionButton> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
+        width: _isHovered ? 330 : 50,
+        constraints: const BoxConstraints(minHeight: 50),
+        padding: EdgeInsets.symmetric(
+          horizontal: _isHovered ? 16 : 0,
+          vertical: _isHovered ? 12 : 0,
+        ),
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 130, 75, 120),
+          borderRadius: BorderRadius.circular(_isHovered ? 16 : 25),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 8,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: _isHovered
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Based off the physics resources you saved last week, you should check out:',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      height: 1.25,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  RichText(
+                    text: TextSpan(
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        height: 1.45,
+                      ),
+                      children: const [
+                        TextSpan(text: '• '),
+                        TextSpan(
+                          text: 'this physics article from Kevin Zhou',
+                          style: TextStyle(
+                            decoration: TextDecoration.underline,
+                            color: Colors.white,
+                          ),
+                        ),
+                        TextSpan(text: '\n• '),
+                        TextSpan(
+                          text: 'this kinematics packet',
+                          style: TextStyle(
+                            decoration: TextDecoration.underline,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              )
+            : const Icon(
+                Icons.lightbulb_outline,
+                color: Colors.white,
+                size: 24,
+              ),
+      ),
+    );
+  }
+}
+
+class _AnalyticsPanel extends StatefulWidget {
   final List<_Category> categories;
   final Color cardColor;
 
   const _AnalyticsPanel({required this.categories, required this.cardColor});
 
+  @override
+  State<_AnalyticsPanel> createState() => _AnalyticsPanelState();
+}
+
+class _AnalyticsPanelState extends State<_AnalyticsPanel> {
+  int _expandedIndex = -1;
+
   static const analyticsCardColor = Color(0xFFE4D4E3);
+
+  // Function to trigger Focus Sprint Mode when the arrow is clicked
+  void _startFocusSprint(BuildContext context, String categoryTitle) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: const Color(0xFFE8E1EC),
+        title: Text(
+          'Focus Sprint: $categoryTitle',
+          style: TextStyle(
+            color: widget.cardColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          'Launching active session timer, ambient background frequencies, and distraction lock-out for "$categoryTitle". Ready to start your deep work session?',
+          style: const TextStyle(color: Colors.black87, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: widget.cardColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) =>
+                      FocusSprintScreen(categoryTitle: categoryTitle),
+                ),
+              );
+            },
+            child: const Text('Start Sprint'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -186,22 +342,117 @@ class _AnalyticsPanel extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _PanelHeader(title: 'Your Month At A Glance', color: cardColor),
-            const SizedBox(height: 8),
+            _PanelHeader(
+              title: 'Your Month At A Glance',
+              color: widget.cardColor,
+            ),
+            const SizedBox(height: 16),
             Wrap(
               spacing: spacing,
               runSpacing: spacing,
-              children: categories
-                  .map(
-                    (category) => SizedBox(
-                      width: cardWidth,
-                      child: _AnalyticsCard(
-                        category: category,
+              children: widget.categories.asMap().entries.map((entry) {
+                final index = entry.key;
+                final category = entry.value;
+                final isExpanded = _expandedIndex == index;
+
+                return SizedBox(
+                  width: isExpanded ? constraints.maxWidth : cardWidth,
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _expandedIndex = isExpanded ? -1 : index;
+                      });
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      child: Card(
                         color: analyticsCardColor,
+                        margin: EdgeInsets.zero,
+                        elevation: isExpanded ? 4 : 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(14),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Top row: Category title + Arrow button for Focus Sprint
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      category.title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: widget.cardColor.withValues(
+                                          alpha: 0.85,
+                                        ),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                  // The arrow button to launch Focus Sprint Mode
+                                  InkWell(
+                                    borderRadius: BorderRadius.circular(12),
+                                    onTap: () => _startFocusSprint(
+                                      context,
+                                      category.title,
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(4.0),
+                                      child: Icon(
+                                        Icons.arrow_forward_ios_rounded,
+                                        size: 13,
+                                        color: widget.cardColor,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                category.minutesSpent,
+                                style: TextStyle(
+                                  color: widget.cardColor,
+                                  fontSize: isExpanded ? 36 : 26,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Text(
+                                'minutes',
+                                style: TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 11,
+                                ),
+                              ),
+                              if (isExpanded) ...[
+                                const SizedBox(height: 12),
+                                const Divider(color: Colors.black26),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Detailed AI Breakdown:\nYou spent a significant amount of time focusing on ${category.title} this month. This accounts for a high percentage of your overall productivity goal progress. Tap again to collapse.',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Colors.black87,
+                                    fontSize: 13,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  )
-                  .toList(),
+                  ),
+                );
+              }).toList(),
             ),
           ],
         );
@@ -283,65 +534,6 @@ class _CategoryCard extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _AnalyticsCard extends StatelessWidget {
-  final _Category category;
-  final Color color;
-
-  const _AnalyticsCard({required this.category, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1.35,
-      child: Card(
-        color: color,
-        margin: EdgeInsets.zero,
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(6),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                category.minutesSpent,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 25,
-                  fontWeight: FontWeight.w800,
-                  height: 1,
-                ),
-              ),
-              const SizedBox(height: 2),
-              const Text(
-                'minutes',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                category.title,
-                textAlign: TextAlign.center,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  height: 1.15,
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

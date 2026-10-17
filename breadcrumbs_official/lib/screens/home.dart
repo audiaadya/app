@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'spaced_repitition.dart';
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  static const bookmarkCardColors = [Color(0xFF6672AA), Color(0xFFB872A5)];
+  static const bookmarkCardColors = [Color(0xFF6672AA)];
 
   static const categories = <_Category>[
     _Category(title: 'School & Access', items: ['♡ classlink']),
@@ -29,6 +31,120 @@ class HomeScreen extends StatelessWidget {
     ),
   ];
 
+  void _showCACPopup(BuildContext context) {
+    showGeneralDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Dismiss notification',
+      barrierColor: Colors.transparent,
+      transitionDuration: const Duration(milliseconds: 250),
+      pageBuilder: (dialogContext, animation, secondaryAnimation) {
+        return SafeArea(
+          child: Align(
+            alignment: Alignment.topRight,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  width: 380,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: const Color(0xFF6672AA),
+                      width: 2,
+                    ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 18,
+                        offset: Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const CircleAvatar(
+                              backgroundColor: Color(0xFF6672AA),
+                              child: Icon(
+                                Icons.smart_toy_outlined,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            const Expanded(
+                              child: Text(
+                                'Activity Reminder',
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: 'Dismiss',
+                              onPressed: () => Navigator.pop(dialogContext),
+                              icon: const Icon(Icons.close),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          '''Your spaced repition session for Robotics is scheduled for today!''',
+                          style: TextStyle(height: 1.35),
+                        ),
+                        const SizedBox(height: 14),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: FilledButton(
+                            onPressed: () {
+                              Navigator.pop(dialogContext);
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      const SpacedRepetitionScreen(),
+                                ),
+                              );
+                            },
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFF6672AA),
+                              foregroundColor: Colors.white,
+                            ),
+                            child: const Text('Test your knowledge!'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final offsetAnimation =
+            Tween<Offset>(
+              begin: const Offset(0, -0.15),
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+            );
+        return SlideTransition(
+          position: offsetAnimation,
+          child: FadeTransition(opacity: animation, child: child),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     const backgroundColor = Color(0xFFF9EAF0);
@@ -37,95 +153,119 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: backgroundColor,
       body: SafeArea(
-        child: Scrollbar(
-          thumbVisibility: true,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: cardColor,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  'Week Analysis Summary',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+        child: Stack(
+          children: [
+            Scrollbar(
+              thumbVisibility: true,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 76, 16, 16),
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: cardColor,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      'Week Analysis Summary',
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              ...categories.asMap().entries.map(
+                                (entry) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 10),
+                                  child: _CategoryCard(
+                                    category: entry.value,
+                                    color: entry.key.isEven
+                                        ? cardColor
+                                        : cardColor.withValues(alpha: 0.85),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE4D4E3),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Your Week Analysis',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall
+                                      ?.copyWith(
+                                        color: Colors.black87,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'A Breakdown of Your Bookmark Engagement',
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(
+                                        color: Colors.black87,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                ),
+                                const SizedBox(height: 16),
+                                const SizedBox(
+                                  height: 180,
+                                  width: double.infinity,
+                                  child: CustomPaint(
+                                    painter: _BookmarkPieChartPainter(),
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                const _PieChartLegend(),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              top: 12,
+              right: 16,
+              child: ElevatedButton.icon(
+                onPressed: () => _showCACPopup(context),
+                icon: const Icon(Icons.notifications_active_outlined),
+                label: const Text('Push notification for CAC video'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: cardColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          ...categories.asMap().entries.map(
-                            (entry) => Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: _CategoryCard(
-                                category: entry.value,
-                                color:
-                                    bookmarkCardColors[entry.key %
-                                        bookmarkCardColors.length],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE4D4E3),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Your Week Analysis',
-                              style: Theme.of(context).textTheme.headlineSmall
-                                  ?.copyWith(
-                                    color: Colors.black87,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'A Breakdown of Your Bookmark Engagement',
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(
-                                    color: Colors.black87,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
-                            const SizedBox(height: 16),
-                            const SizedBox(
-                              height: 180,
-                              width: double.infinity,
-                              child: CustomPaint(
-                                painter: _BookmarkPieChartPainter(),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            const _PieChartLegend(),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

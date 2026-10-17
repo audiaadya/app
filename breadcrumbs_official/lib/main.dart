@@ -17,7 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/home.dart';
 import 'screens/auth_screen.dart';
 import 'screens/likes.dart';
-import 'screens/learninggoals.dart';
+import 'screens/goals.dart';
 import 'screens/profile.dart';
 import 'screens/search.dart';
 
@@ -31,13 +31,15 @@ Future<void> main() async {
 }
 
 Future<void> _initializeNotifications() async {
-  if (kIsWeb || defaultTargetPlatform == TargetPlatform.windows) {
+  if (kIsWeb) {
     return;
   }
 
   try {
     await initNotifications();
-    await scheduleFilmingNotification(hour: 10, minute: 30);
+    if (defaultTargetPlatform != TargetPlatform.windows) {
+      await scheduleFilmingNotification(hour: 10, minute: 30);
+    }
   } catch (error, stackTrace) {
     debugPrint('Unable to initialize notifications: $error');
     debugPrintStack(stackTrace: stackTrace);
@@ -330,7 +332,7 @@ int targetHour = 20;
 int targetMinute = 34;
 
 Future<void> initNotifications() async {
-  if (kIsWeb || defaultTargetPlatform == TargetPlatform.windows) {
+  if (kIsWeb) {
     return;
   }
 
@@ -339,16 +341,91 @@ Future<void> initNotifications() async {
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
 
-  const DarwinInitializationSettings initializationSettingsDarwin =
-      DarwinInitializationSettings();
+  final DarwinInitializationSettings initializationSettingsDarwin =
+      DarwinInitializationSettings(
+        notificationCategories: [
+          DarwinNotificationCategory(
+            'cac_video',
+            actions: [
+              DarwinNotificationAction.plain(
+                'test_knowledge',
+                'Test your knowledge!',
+              ),
+            ],
+          ),
+        ],
+      );
 
-  const InitializationSettings initializationSettings = InitializationSettings(
+  final InitializationSettings initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
     iOS: initializationSettingsDarwin,
+    windows: const WindowsInitializationSettings(
+      appName: 'Breadcrumbs',
+      appUserModelId: 'Audiaadya.Breadcrumbs.App',
+      guid: '9e5e1ca3-2ad0-4c33-9db4-4ccf286b5e2e',
+    ),
   );
 
   await flutterLocalNotificationsPlugin.initialize(
     settings: initializationSettings,
+    onDidReceiveNotificationResponse: _handleNotificationResponse,
+  );
+}
+
+void _handleNotificationResponse(NotificationResponse response) {
+  if (response.actionId == 'test_knowledge') {
+    debugPrint('CAC knowledge test selected.');
+  }
+}
+
+Future<void> pushCACNotification() async {
+  if (kIsWeb) {
+    return;
+  }
+
+  final androidPlugin = flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin
+      >();
+  await androidPlugin?.requestNotificationsPermission();
+
+  final iosPlugin = flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+        IOSFlutterLocalNotificationsPlugin
+      >();
+  await iosPlugin?.requestPermissions(alert: true, badge: true, sound: true);
+
+  await flutterLocalNotificationsPlugin.show(
+    id: 1,
+    title: 'CAC Robotics Video',
+    body: 'Watch the robotics video you saved and see how much you remember.',
+    notificationDetails: const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'filming_channel',
+        'Filming Reminders',
+        channelDescription: 'Robotics and saved-content reminders',
+        importance: Importance.max,
+        priority: Priority.high,
+        actions: [
+          AndroidNotificationAction(
+            'test_knowledge',
+            'Test your knowledge!',
+            showsUserInterface: true,
+          ),
+        ],
+      ),
+      iOS: DarwinNotificationDetails(categoryIdentifier: 'cac_video'),
+      windows: WindowsNotificationDetails(
+        subtitle: 'Robotics video reminder',
+        actions: [
+          WindowsAction(
+            arguments: 'test_knowledge',
+            content: 'Test your knowledge!',
+          ),
+        ],
+      ),
+    ),
+    payload: 'cac_video',
   );
 }
 

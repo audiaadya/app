@@ -2,9 +2,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "breadcrumbs_official",
+      "name": "Breadcrumbs Official",
       "request": "launch",
       "type": "dart",
+      "cwd": "${workspaceFolder}/breadcrumbs_official",
       "program": "lib/main.dart",
       "flutterMode": "debug",
       "deviceId": "chrome"
