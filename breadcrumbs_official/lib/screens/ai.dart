@@ -5,9 +5,7 @@ class SearchScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: AiChat(),
-    );
+    return const Scaffold(body: AiChat());
   }
 }
 
@@ -29,8 +27,9 @@ class _AiChatState extends State<AiChat> {
   final _messages = <_Msg>[
     const _Msg('Explain my activity for this week.', true),
     const _Msg(
-        'Sure! You spent 3 hours on Physics Olympiad prep, 2 hours on AMC practice, and 1 hour on AP Biology review. You also bookmarked several resources on robotics for future reference. Would you like me to recommend activities and resources for next week based on your interests?',
-        false),
+      'Sure! You spent 3 hours on Physics Olympiad prep, 2 hours on AMC practice, and 1 hour on AP Biology review. You also bookmarked several resources on robotics for future reference. Would you like me to recommend activities and resources for next week based on your interests?',
+      false,
+    ),
   ];
   bool _typing = true;
 
@@ -52,9 +51,12 @@ class _AiChatState extends State<AiChat> {
       if (!mounted) return;
       setState(() {
         _typing = false;
-        _messages.add(const _Msg(
+        _messages.add(
+          const _Msg(
             'Based off what you engaged with last week, you should focus on practicing more physics problems and reviewing AP Biology concepts. I recommend checking out the Physics Olympiad resources you bookmarked and spending some time on the AP Biology Penguins website for additional practice.',
-            false));
+            false,
+          ),
+        );
       });
     });
   }
@@ -98,6 +100,7 @@ class _AiChatState extends State<AiChat> {
               },
             ),
           ),
+          
           SafeArea(
             top: false,
             child: Padding(
@@ -112,7 +115,9 @@ class _AiChatState extends State<AiChat> {
                         hintText: 'Message Assistant…',
                         filled: true,
                         contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
                           borderSide: BorderSide.none,
@@ -122,7 +127,9 @@ class _AiChatState extends State<AiChat> {
                   ),
                   const SizedBox(width: 8),
                   IconButton.filled(
-                      onPressed: _send, icon: const Icon(Icons.arrow_upward)),
+                    onPressed: _send,
+                    icon: const Icon(Icons.arrow_upward),
+                  ),
                 ],
               ),
             ),
@@ -132,6 +139,7 @@ class _AiChatState extends State<AiChat> {
     );
   }
 }
+
 
 class _Bubble extends StatelessWidget {
   final bool fromUser;
@@ -166,9 +174,10 @@ class _TypingDots extends StatefulWidget {
 
 class _TypingDotsState extends State<_TypingDots>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _c =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 900))
-        ..repeat();
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  )..repeat();
 
   @override
   void dispose() {
@@ -192,7 +201,9 @@ class _TypingDotsState extends State<_TypingDots>
               margin: const EdgeInsets.symmetric(horizontal: 3),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: color.withValues(alpha: 0.4 + 0.6 * (1 - (t - 0.5).abs() * 2)),
+                color: color.withValues(
+                  alpha: 0.4 + 0.6 * (1 - (t - 0.5).abs() * 2),
+                ),
               ),
             );
           }),
@@ -201,4 +212,3 @@ class _TypingDotsState extends State<_TypingDots>
     );
   }
 }
-

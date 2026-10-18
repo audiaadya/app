@@ -245,6 +245,8 @@ class HomeScreen extends StatelessWidget {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 20),
+                  const _WeeklySummaryCard(),
                 ],
               ),
             ),
@@ -407,6 +409,53 @@ class _PieChartLegend extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class _WeeklySummaryCard extends StatelessWidget {
+  const _WeeklySummaryCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFF6672AA), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'AI Summary of Your Week',
+            style: TextStyle(
+              color: Color(0xFF6672AA),
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          SizedBox(height: 12),
+          Text(
+            "Your distribution shows an intense, high-impact academic sprint geared squarely toward competitive math and physics. Because you're heavily indexing on rigorous problem-solving blocks, ensure you're balancing these sessions with adequate cognitive rest to prevent burnout. If you want more practice, you should focus on practicing more physics problems and reviewing AP Biology concepts. I recommend checking out the Physics Olympiad resources you bookmarked and spending some time on the AP Biology Penguins website for additional practice.",
+            style: TextStyle(
+              color: Color(0xFF302F3D),
+              fontSize: 15,
+              height: 1.45,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
