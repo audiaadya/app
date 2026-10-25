@@ -39,10 +39,7 @@ class _AuthScreenState extends State<AuthScreen> {
       final password = _passwordController.text;
 
       if (_isLogin) {
-        await AppwriteService.signIn(
-          email: email,
-          password: password,
-        );
+        await AppwriteService.signIn(email: email, password: password);
 
         if (!mounted) return;
         widget.onAuthenticated?.call();
@@ -85,7 +82,7 @@ class _AuthScreenState extends State<AuthScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFFEEF2FF), Color(0xFFE0E7FF), Color(0xFFFDF2F8)],
+            colors: [Color(0xFFF8E99A), Color(0xFFFFF9D8), Color(0xFFFFE8B6)],
           ),
         ),
         child: SafeArea(
@@ -112,7 +109,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             decoration: const BoxDecoration(
                               shape: BoxShape.circle,
                               gradient: LinearGradient(
-                                colors: [Color(0xFF4F46E5), Color(0xFFEC4899)],
+                                colors: [Color(0xFF7D2B2F), Color(0xFFE09A45)],
                               ),
                             ),
                             child: const Icon(
@@ -128,7 +125,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             style: const TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF111827),
+                              color: Color(0xFF4A2022),
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -139,7 +136,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               fontSize: 15,
-                              color: Color(0xFF6B7280),
+                              color: Color(0xFF8B5A45),
                             ),
                           ),
                           const SizedBox(height: 20),
@@ -150,7 +147,9 @@ class _AuthScreenState extends State<AuthScreen> {
                                 labelText: 'Full name',
                                 prefixIcon: Icon(Icons.person_outline),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(16)),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(16),
+                                  ),
                                 ),
                               ),
                               validator: (value) {
@@ -169,7 +168,9 @@ class _AuthScreenState extends State<AuthScreen> {
                               labelText: 'Email',
                               prefixIcon: Icon(Icons.email_outlined),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(Radius.circular(16)),
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(16),
+                                ),
                               ),
                             ),
                             validator: (value) {
@@ -190,7 +191,9 @@ class _AuthScreenState extends State<AuthScreen> {
                               labelText: 'Password',
                               prefixIcon: Icon(Icons.lock_outline),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(Radius.circular(16)),
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(16),
+                                ),
                               ),
                             ),
                             validator: (value) {
@@ -207,7 +210,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           ElevatedButton(
                             onPressed: _isSubmitting ? null : _submit,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF4F46E5),
+                              backgroundColor: const Color(0xFF5B2845),
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
@@ -236,7 +239,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               _isLogin
                                   ? "Need an account? Sign up"
                                   : 'Already have an account? Sign in',
-                              style: const TextStyle(color: Color(0xFF4F46E5)),
+                              style: const TextStyle(color: Color(0xFF7D2B2F)),
                             ),
                           ),
                         ],
@@ -252,5 +255,3 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 }
-
-

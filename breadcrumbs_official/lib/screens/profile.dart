@@ -41,11 +41,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F3FF),
+      backgroundColor: const Color(0xFFF8E99A),
       appBar: AppBar(
         title: const Text('Profile'),
         centerTitle: true,
-        backgroundColor: const Color(0xFF4F46E5),
+        backgroundColor: const Color(0xFF5B2845),
         foregroundColor: Colors.white,
       ),
       body: FutureBuilder<models.User>(
@@ -81,11 +81,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF7C3AED), Color(0xFFEC4899)],
+                      colors: [Color(0xFF5B2845), Color(0xFFD96C5F)],
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF7C3AED).withValues(alpha: 0.3),
+                        color: const Color(0xFF5B2845).withValues(alpha: 0.3),
                         blurRadius: 20,
                         offset: const Offset(0, 12),
                       ),
@@ -108,7 +108,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1F2937),
+                    color: Color(0xFF3B2930),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -116,7 +116,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   user.email.isNotEmpty ? user.email : 'No email',
                   style: const TextStyle(
                     fontSize: 16,
-                    color: Color(0xFF6B7280),
+                    color: Color(0xFF7A5965),
                   ),
                 ),
                 const SizedBox(height: 28),
@@ -142,12 +142,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF6B7280),
+                          color: Color(0xFF7A5965),
                         ),
                       ),
                       const SizedBox(height: 12),
                       _InfoRow(label: 'User ID', value: user.$id),
-                      _InfoRow(label: 'Verification', value: user.emailVerification ? 'Verified' : 'Not verified'),
+                      _InfoRow(
+                        label: 'Verification',
+                        value: user.emailVerification
+                            ? 'Verified'
+                            : 'Not verified',
+                      ),
                     ],
                   ),
                 ),
@@ -157,7 +162,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: ElevatedButton.icon(
                     onPressed: _logout,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF111827),
+                      backgroundColor: const Color(0xFF5B2845),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
@@ -181,10 +186,7 @@ class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _InfoRow({
-    required this.label,
-    required this.value,
-  });
+  const _InfoRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -198,7 +200,7 @@ class _InfoRow extends StatelessWidget {
             child: Text(
               label,
               style: const TextStyle(
-                color: Color(0xFF6B7280),
+                color: Color(0xFF7A5965),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -207,7 +209,7 @@ class _InfoRow extends StatelessWidget {
             child: Text(
               value,
               style: const TextStyle(
-                color: Color(0xFF111827),
+                color: Color(0xFF3B2930),
                 fontWeight: FontWeight.w600,
               ),
             ),

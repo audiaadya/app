@@ -1,8 +1,8 @@
 import 'dart:async';
 
-// for da cool intro
-import 'package:flutter/material.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -20,13 +20,19 @@ import 'screens/likes.dart';
 import 'screens/goals.dart';
 import 'screens/profile.dart';
 import 'screens/search.dart';
+import 'screens/time_blocking.dart';
 
 // where everything starts!
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
   final isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
-  runApp(MyApp(initialFirstLaunch: isFirstLaunch));
+  runApp(
+    DevicePreview(
+      enabled: true,
+      builder: (context) => MyApp(initialFirstLaunch: isFirstLaunch),
+    ),
+  );
   unawaited(_initializeNotifications());
 }
 
@@ -94,10 +100,39 @@ class _MyAppState extends State<MyApp> {
   // where the actual code for the onboarding begins
   Widget build(BuildContext context) {
     return MaterialApp(
+      locale: DevicePreview.locale(context),
+      builder: DevicePreview.appBuilder,
       debugShowCheckedModeBanner: false,
       title: 'Bookmarks Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme:
+            ColorScheme.fromSeed(
+              seedColor: const Color(0xFF5B2845),
+              brightness: Brightness.light,
+            ).copyWith(
+              primary: const Color(0xFF5B2845),
+              onPrimary: const Color(0xFFFFF9D8),
+              secondary: const Color(0xFFD96C5F),
+              surface: const Color(0xFFFFF9D8),
+              onSurface: const Color(0xFF3B2930),
+            ),
+        scaffoldBackgroundColor: const Color(0xFFF8E99A),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFFF8E99A),
+          foregroundColor: Color(0xFF3B2930),
+          elevation: 0,
+        ),
+        cardTheme: CardThemeData(
+          color: const Color(0xFFFFF9D8),
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+          ),
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: Color(0xFF5B2845),
+          foregroundColor: Color(0xFFFFF9D8),
+        ),
         useMaterial3: true,
       ),
       home: _showIntro
@@ -130,22 +165,22 @@ class ConcentricAnimationOnboarding extends StatelessWidget {
       icon: Icons.bookmark_add_outlined,
       title: 'Welcome to Breadcrumbs',
       subtitle: 'Tap the circle to move into the next slide.',
-      bgColor: Color(0xFF3B1791),
-      textColor: Colors.white,
+      bgColor: Color(0xFF5B2845),
+      textColor: Color(0xFFFFF9D8),
     ),
     PageData(
       icon: Icons.account_tree_outlined,
       title: 'See them organized by topic',
       subtitle: 'Your bookmarks become a visual map of interests.',
-      bgColor: Color(0xFFFAB800),
-      textColor: Color(0xFF3B1790),
+      bgColor: Color(0xFFD96C5F),
+      textColor: Color(0xFF3B2930),
     ),
     PageData(
       icon: Icons.auto_awesome,
       title: 'Explore with AI insights',
       subtitle: 'Finish onboarding to open your dashboard.',
-      bgColor: Color(0xFFFFFFFF),
-      textColor: Color(0xFF3B1790),
+      bgColor: Color(0xFFF8E99A),
+      textColor: Color(0xFF5B2845),
     ),
   ];
 
@@ -168,7 +203,7 @@ class ConcentricAnimationOnboarding extends StatelessWidget {
             shape: BoxShape.circle,
             color: Colors.white,
           ),
-          child: const Icon(Icons.navigate_next, color: Color(0xFF3B1791)),
+          child: const Icon(Icons.navigate_next, color: Color(0xFF5B2845)),
         ),
         itemBuilder: (index) {
           final page = pages[index];
@@ -266,7 +301,7 @@ class _HomeScaffoldState extends State<HomeScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    const accent = Color.fromARGB(255, 77, 67, 162);
+    const accent = Color(0xFF5B2845);
 
     Widget body;
     switch (_selectedIndex) {
@@ -282,6 +317,9 @@ class _HomeScaffoldState extends State<HomeScaffold> {
       case 3:
         body = const LearningGoalsScreen();
         break;
+      case 4:
+        body = const TimeBlockingScreen();
+        break;
       default:
         body = ProfileScreen(onSignOut: widget.onSignOut);
     }
@@ -289,10 +327,12 @@ class _HomeScaffoldState extends State<HomeScaffold> {
     return Scaffold(
       body: body,
       bottomNavigationBar: SalomonBottomBar(
+        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+        itemPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
         currentIndex: _selectedIndex,
         onTap: (index) => setState(() => _selectedIndex = index),
-        selectedItemColor: const Color.fromARGB(255, 104, 14, 92),
-        unselectedItemColor: const Color.fromARGB(179, 122, 114, 158),
+        selectedItemColor: const Color(0xFF5B2845),
+        unselectedItemColor: const Color(0xFF8E6876),
         items: [
           SalomonBottomBarItem(
             icon: const Icon(Icons.home),
@@ -312,6 +352,11 @@ class _HomeScaffoldState extends State<HomeScaffold> {
           SalomonBottomBarItem(
             icon: const Icon(Icons.flag_outlined),
             title: const Text('Goals'),
+            selectedColor: accent,
+          ),
+          SalomonBottomBarItem(
+            icon: const Icon(Icons.schedule_rounded),
+            title: const Text('Plan'),
             selectedColor: accent,
           ),
           SalomonBottomBarItem(

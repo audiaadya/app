@@ -5,7 +5,10 @@ class SearchScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: AiChat());
+    return const Scaffold(
+      backgroundColor: _AiChatState.backgroundColor,
+      body: AiChat(),
+    );
   }
 }
 
@@ -23,6 +26,10 @@ class AiChat extends StatefulWidget {
 }
 
 class _AiChatState extends State<AiChat> {
+  static const backgroundColor = Color(0xFFF8E99A);
+  static const inkColor = Color(0xFF3B2930);
+  static const lavender = Color(0xFF5B2845);
+
   final _controller = TextEditingController();
   final _messages = <_Msg>[
     const _Msg('Explain my activity for this week.', true),
@@ -31,7 +38,7 @@ class _AiChatState extends State<AiChat> {
       false,
     ),
   ];
-  bool _typing = true;
+  bool _typing = false;
 
   @override
   void dispose() {
@@ -61,25 +68,75 @@ class _AiChatState extends State<AiChat> {
     });
   }
 
+  void _sendPrompt(String prompt) {
+    _controller.text = prompt;
+    _send();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
+        backgroundColor: backgroundColor,
+        foregroundColor: inkColor,
+        elevation: 0,
+        titleSpacing: 18,
         title: const Row(
           children: [
-            CircleAvatar(radius: 14, child: Icon(Icons.auto_awesome, size: 16)),
+            _AssistantAvatar(size: 38),
             SizedBox(width: 10),
-            Text('Assistant'),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Study buddy',
+                  style: TextStyle(
+                    color: inkColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Text(
+                  'always rooting for you',
+                  style: TextStyle(
+                    color: Colors.black54,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: IconButton(
+              tooltip: 'Clear conversation',
+              onPressed: () => setState(() {
+                _messages
+                  ..clear()
+                  ..add(
+                    const _Msg(
+                      'Hi! I’m ready to help you make sense of your learning week.',
+                      false,
+                    ),
+                  );
+                _typing = false;
+              }),
+              icon: const Icon(Icons.refresh_rounded),
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [
+          const _WelcomeCard(),
+          _PromptChips(onPromptSelected: _sendPrompt),
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               itemCount: _messages.length + (_typing ? 1 : 0),
               itemBuilder: (context, i) {
                 if (_typing && i == _messages.length) {
@@ -91,20 +148,19 @@ class _AiChatState extends State<AiChat> {
                   child: Text(
                     m.text,
                     style: TextStyle(
-                      color: m.fromUser
-                          ? scheme.onPrimary
-                          : scheme.onSurfaceVariant,
+                      color: m.fromUser ? Colors.white : inkColor,
+                      height: 1.4,
                     ),
                   ),
                 );
               },
             ),
           ),
-          
+
           SafeArea(
             top: false,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+              padding: const EdgeInsets.fromLTRB(14, 4, 14, 14),
               child: Row(
                 children: [
                   Expanded(
@@ -112,23 +168,47 @@ class _AiChatState extends State<AiChat> {
                       controller: _controller,
                       onSubmitted: (_) => _send(),
                       decoration: InputDecoration(
-                        hintText: 'Message Assistant…',
+                        hintText: 'Ask your study buddy…',
+                        hintStyle: TextStyle(
+                          color: inkColor.withValues(alpha: 0.45),
+                        ),
                         filled: true,
+                        fillColor: Colors.white,
                         contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
+                          horizontal: 18,
+                          vertical: 14,
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
-                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(22),
+                          borderSide: BorderSide(
+                            color: lavender.withValues(alpha: 0.12),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(22),
+                          borderSide: BorderSide(
+                            color: lavender.withValues(alpha: 0.12),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(22),
+                          borderSide: const BorderSide(
+                            color: lavender,
+                            width: 1.5,
+                          ),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  IconButton.filled(
+                  IconButton(
                     onPressed: _send,
-                    icon: const Icon(Icons.arrow_upward),
+                    style: IconButton.styleFrom(
+                      backgroundColor: lavender,
+                      foregroundColor: Colors.white,
+                      fixedSize: const Size(48, 48),
+                    ),
+                    icon: const Icon(Icons.arrow_upward_rounded),
                   ),
                 ],
               ),
@@ -140,6 +220,124 @@ class _AiChatState extends State<AiChat> {
   }
 }
 
+class _AssistantAvatar extends StatelessWidget {
+  final double size;
+
+  const _AssistantAvatar({required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF5B2845), Color(0xFFD96C5F)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(
+        Icons.auto_awesome_rounded,
+        color: Colors.white,
+        size: size * .5,
+      ),
+    );
+  }
+}
+
+class _WelcomeCard extends StatelessWidget {
+  const _WelcomeCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 10),
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFFBF2), Color(0xFFF0D2BD)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text(
+                  'What are we figuring out today?',
+                  style: TextStyle(
+                    color: _AiChatState.inkColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'I can spot patterns, make a plan, or cheer you on.',
+                  style: TextStyle(
+                    color: Colors.black54,
+                    fontSize: 12,
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PromptChips extends StatelessWidget {
+  final ValueChanged<String> onPromptSelected;
+
+  const _PromptChips({required this.onPromptSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    const prompts = [
+      ('Weekly recap', Icons.auto_graph_rounded),
+      ('Make me a plan', Icons.calendar_month_rounded),
+      ('Find my pattern', Icons.insights_rounded),
+    ];
+    return SizedBox(
+      height: 42,
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        scrollDirection: Axis.horizontal,
+        itemCount: prompts.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final prompt = prompts[index];
+          return ActionChip(
+            onPressed: () => onPromptSelected(prompt.$1),
+            avatar: Icon(prompt.$2, size: 16, color: _AiChatState.lavender),
+            label: Text(prompt.$1),
+            labelStyle: const TextStyle(
+              color: _AiChatState.inkColor,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+            backgroundColor: Colors.white,
+            side: BorderSide(
+              color: _AiChatState.lavender.withValues(alpha: 0.15),
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
 
 class _Bubble extends StatelessWidget {
   final bool fromUser;
@@ -148,18 +346,35 @@ class _Bubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Align(
       alignment: fromUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        constraints: const BoxConstraints(maxWidth: 300),
-        decoration: BoxDecoration(
-          color: fromUser ? scheme.primary : scheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: child,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            constraints: const BoxConstraints(maxWidth: 320),
+            decoration: BoxDecoration(
+              color: fromUser ? _AiChatState.lavender : Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: const Radius.circular(19),
+                topRight: const Radius.circular(19),
+                bottomLeft: Radius.circular(fromUser ? 19 : 5),
+                bottomRight: Radius.circular(fromUser ? 5 : 19),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: _AiChatState.inkColor.withValues(alpha: 0.06),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: child,
+          ),
+        ],
       ),
     );
   }

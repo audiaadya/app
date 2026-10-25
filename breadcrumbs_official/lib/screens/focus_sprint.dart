@@ -18,8 +18,8 @@ class _FocusSprintScreenState extends State<FocusSprintScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const backgroundColor = Color(0xFFF9EAF0);
-    const cardColor = Color(0xFF6672AA);
+    const backgroundColor = Color(0xFFF8E99A);
+    const cardColor = Color(0xFF7D2B2F);
 
     return Scaffold(
       backgroundColor: backgroundColor,

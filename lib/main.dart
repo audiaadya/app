@@ -57,7 +57,7 @@ class _MyAppState extends State<MyApp> {
       _isAuthenticated = false;
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -171,7 +171,8 @@ class _ConcentricPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    final circleColor = page.textColor == Colors.white ? Colors.white : Colors.black;
+    final circleColor =
+        page.textColor == Colors.white ? Colors.white : Colors.black;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,

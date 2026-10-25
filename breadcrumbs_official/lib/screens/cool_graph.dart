@@ -2,10 +2,10 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 abstract final class AppColors {
-  static const primary = Color(0xFF6672AA);
-  static const contentColorGreen = Color(0xFF50E3C2);
-  static const contentColorPink = Color(0xFFFF6B9D);
-  static const contentColorCyan = Color(0xFF4FC3F7);
+  static const primary = Color(0xFF5B2845);
+  static const contentColorGreen = Color(0xFF7F9A88);
+  static const contentColorPink = Color(0xFFC47C62);
+  static const contentColorCyan = Color(0xFFD96C5F);
 }
 
 class _LineChart extends StatelessWidget {

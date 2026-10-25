@@ -23,12 +23,19 @@ class _SpacedRepetitionScreenState extends State<SpacedRepetitionScreen> {
       correctAnswerIndex: 1,
     ),
     _QuizQuestion(
-      question: 'What is the gravitational constant (G) value in the universal law of gravitation?',
-      options: ['6.674 × 10⁻¹¹ N⋅m²/kg²', '9.81 m/s²', '3.00 × 10⁸ m/s', '1.602 × 10⁻¹⁹ C'],
+      question:
+          'What is the gravitational constant (G) value in the universal law of gravitation?',
+      options: [
+        '6.674 × 10⁻¹¹ N⋅m²/kg²',
+        '9.81 m/s²',
+        '3.00 × 10⁸ m/s',
+        '1.602 × 10⁻¹⁹ C',
+      ],
       correctAnswerIndex: 0,
     ),
     _QuizQuestion(
-      question: 'If a car travels a total distance of 120 miles in 2 hours, what is its average speed?',
+      question:
+          'If a car travels a total distance of 120 miles in 2 hours, what is its average speed?',
       options: ['60 mph', '120 mph', '240 mph', '30 mph'],
       correctAnswerIndex: 0,
     ),
@@ -109,8 +116,8 @@ class _SpacedRepetitionScreenState extends State<SpacedRepetitionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const backgroundColor = Color(0xFFF9EAF0);
-    const cardColor = Color(0xFF6672AA);
+    const backgroundColor = Color(0xFFF8E99A);
+    const cardColor = Color(0xFF7D2B2F);
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -219,9 +226,9 @@ class _AnswerOption extends StatelessWidget {
     final isCorrect = selectedIndex != null && index == correctIndex;
     final isIncorrect = isSelected && !isCorrect;
     final color = isCorrect
-        ? Colors.green
+        ? const Color(0xFF7A8B57)
         : isIncorrect
-        ? Colors.red
+        ? const Color(0xFF9B3D35)
         : null;
 
     return InkWell(
@@ -240,7 +247,7 @@ class _AnswerOption extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 14,
-                backgroundColor: color ?? const Color(0xFF6672AA),
+                backgroundColor: color ?? const Color(0xFF7D2B2F),
                 child: Text(
                   String.fromCharCode(65 + index),
                   style: const TextStyle(color: Colors.white),
@@ -249,8 +256,9 @@ class _AnswerOption extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(child: Text(text)),
               if (isCorrect)
-                const Icon(Icons.check_circle, color: Colors.green),
-              if (isIncorrect) const Icon(Icons.cancel, color: Colors.red),
+                const Icon(Icons.check_circle, color: Color(0xFF7A8B57)),
+              if (isIncorrect)
+                const Icon(Icons.cancel, color: Color(0xFF9B3D35)),
             ],
           ),
         ),
@@ -281,7 +289,7 @@ class _QuizResult extends StatelessWidget {
             const Icon(
               Icons.emoji_events_outlined,
               size: 72,
-              color: Color(0xFF6672AA),
+              color: Color(0xFF7D2B2F),
             ),
             const SizedBox(height: 16),
             Text(
